@@ -23,6 +23,7 @@
 
 import { PROPERTIES_MAP } from '@css-loader/css-parser';
 import { getViewMeta, normalizeElementName } from '../elements';
+import { EventMethod } from '../util/event';
 import {
   unicodeToChar,
   tryConvertNumber,
@@ -31,7 +32,6 @@ import {
   getBeforeLoadStyle,
   warn,
   isDev,
-  isEmpty,
   whitespaceFilter,
 } from '../util';
 import Native from '../runtime/native';
@@ -347,8 +347,21 @@ class ElementNode extends ViewNode {
     delete this.attributes[key];
   }
 
+  /**
+   * remove style attr
+   */
+  removeStyle(notToNative = false) {
+    // remove all style
+    this.style = {};
+    if (!notToNative) {
+      updateChild(this);
+    }
+  }
+
   setStyles(batchStyles) {
-    if (isEmpty(batchStyles)) return;
+    if (!batchStyles || typeof batchStyles !== 'object') {
+      return;
+    }
     Object.keys(batchStyles).forEach((styleKey) => {
       const styleValue = batchStyles[styleKey];
       this.setStyle(styleKey, styleValue, true);
@@ -500,7 +513,12 @@ class ElementNode extends ViewNode {
       }
     }
     if (typeof this.polyfillNativeEvents === 'function') {
-      ({ eventNames, callback, options } = this.polyfillNativeEvents('addEventListener', eventNames, callback, options));
+      ({ eventNames, callback, options } = this.polyfillNativeEvents(
+        EventMethod.ADD,
+        eventNames,
+        callback,
+        options,
+      ));
     }
     this._emitter.addEventListener(eventNames, callback, options);
     updateChild(this);
@@ -511,7 +529,12 @@ class ElementNode extends ViewNode {
       return null;
     }
     if (typeof this.polyfillNativeEvents === 'function') {
-      ({ eventNames, callback, options } = this.polyfillNativeEvents('removeEventListener', eventNames, callback, options));
+      ({ eventNames, callback, options } = this.polyfillNativeEvents(
+        EventMethod.REMOVE,
+        eventNames,
+        callback,
+        options,
+      ));
     }
     const observer = this._emitter.removeEventListener(eventNames, callback, options);
     updateChild(this);

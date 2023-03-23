@@ -81,7 +81,7 @@ NSString *HippyBridgeModuleNameForClass(Class cls) {
     if ([cls conformsToProtocol:@protocol(HippyBridgeModule)]) {
         name = [cls moduleName];
     } else if ([cls conformsToProtocol:@protocol(HippyTurboModule)]) {
-        name = [cls turoboModuleName];
+        name = [cls turboModuleName];
     }
     if (name.length == 0) {
         name = NSStringFromClass(cls);
@@ -332,7 +332,6 @@ HIPPY_NOT_IMPLEMENTED(-(instancetype)init)
     HippyLogInfo(@"[Hippy_OC_Log][Life_Circle],%@ setUp %p", NSStringFromClass([self class]), self);
     _performanceLogger = [HippyPerformanceLogger new];
     [_performanceLogger markStartForTag:HippyPLBridgeStartup];
-    //  [_performanceLogger markStartForTag:HippyPLTTI];
 
     // Only update bundleURL from delegate if delegate bundleURL has changed
     NSURL *previousDelegateURL = _delegateBundleURL;
